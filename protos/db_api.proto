@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package db_api;
+
+import "google/rpc/status.proto";
+
+service KeyValueDb {
+    rpc Put(KeyValue) returns (Response);
+    rpc Read(Key) returns (Response);
+    rpc ReadKeyRange(KeyRange) returns (ResponseList);
+    rpc BatchPut(BatchKeyValue) returns (ResponseList);
+    rpc Delete(Key) returns (Response);
+}
+
+message KeyValue {
+    string key = 1;
+    string value = 2;
+}
+
+message Key {
+    string key = 1;
+}
+
+message Response {
+    google.rpc.Status status = 1;
+    string value = 2;
+}
+
+message ResponseList {
+    repeated Response responses = 1;
+}
+
+message KeyRange {
+    string start_key = 1;
+    string end_key = 2;
+}
+
+message BatchKeyValue {
+    repeated KeyValue items = 1;
+}
