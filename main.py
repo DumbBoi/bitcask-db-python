@@ -1,5 +1,7 @@
+from webbrowser import get
+
 import grpc
-import logging
+from logger import get_logger
 from concurrent import futures
 import db_api_pb2_grpc
 import db_api_pb2
@@ -10,13 +12,7 @@ from db import DB
 
 load_dotenv()  # Load environment variables from .env file
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-ch.setLevel(logging.DEBUG)
-logger.addHandler(ch)
+logger = get_logger(__name__)
 
 class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
     """Implementation of the KeyValueDb service."""
@@ -38,7 +34,8 @@ class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
         """
         try:
             logger.info(f"received Put request: key={request.key}, value={request.value}")
-            raise NotImplementedError("Put method not implemented")
+            self.db.write(request.key, request.value)
+            return db_api_pb2.Response(status=db_api_pb2.google_dot_rpc_dot_status__pb2.Status(code=grpc.StatusCode.OK.value[0], message="Success")) # type: ignore
         except Exception as e:
             logger.error(f"Error in Put method: {e}")
             populate_exception_context(context, e)
