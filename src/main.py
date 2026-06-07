@@ -3,8 +3,8 @@ from webbrowser import get
 import grpc
 from logger import get_logger
 from concurrent import futures
-import db_api_pb2_grpc
-import db_api_pb2
+import db_api_pb2_grpc as db_api_pb2_grpc
+import db_api_pb2 as db_api_pb2
 from context_manager import populate_exception_context
 from config_manager import get_config
 from dotenv import load_dotenv
@@ -35,11 +35,11 @@ class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
         try:
             logger.info(f"received Put request: key={request.key}, value={request.value}")
             self.db.write(request.key, request.value)
-            return db_api_pb2.Response(status=db_api_pb2.google_dot_rpc_dot_status__pb2.Status(code=grpc.StatusCode.OK.value[0], message="Success")) # type: ignore
+            return db_api_pb2.Response(status=True) 
         except Exception as e:
             logger.error(f"Error in Put method: {e}")
             populate_exception_context(context, e)
-            return db_api_pb2.Response() # type: ignore
+            return db_api_pb2.Response(status=False) # type: ignore
     
     def Read(self, request: db_api_pb2.Key, context: grpc.ServicerContext) -> db_api_pb2.Response: # type: ignore
         """
@@ -52,11 +52,12 @@ class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
         """
         try:
             logger.info(f"received Read request: key={request.key}")
-            raise NotImplementedError("Read method not implemented")
+            value = self.db.read(request.key)
+            return db_api_pb2.Response(status=True, value=value) # type: ignore
         except Exception as e:
             logger.error(f"Error in Read method: {e}")
             populate_exception_context(context, e)
-            return db_api_pb2.Response() # type: ignore
+            return db_api_pb2.Response(status=False) # type: ignore
 
     def ReadKeyRange(self, request: db_api_pb2.KeyRange, context: grpc.ServicerContext) -> db_api_pb2.ResponseList: # type: ignore
         """Read values in a key range

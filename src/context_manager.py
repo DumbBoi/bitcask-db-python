@@ -6,6 +6,10 @@ def populate_exception_context(context: grpc.ServicerContext, exception: Excepti
         context.set_code(grpc.StatusCode.OK)
         context.set_details("Success")
         return
+    if isinstance(exception, KeyError):
+        context.set_code(grpc.StatusCode.NOT_FOUND)
+        context.set_details(str(exception))
+        return
     if isinstance(exception, NotImplementedError):
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(str(exception))

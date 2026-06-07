@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package db_api;
 
-import "google/rpc/status.proto";
-
 service KeyValueDb {
     rpc Put(KeyValue) returns (Response);
     rpc Read(Key) returns (Response);
@@ -22,7 +20,7 @@ message Key {
 }
 
 message Response {
-    google.rpc.Status status = 1;
+    bool status = 1;
     string value = 2;
 }
 
