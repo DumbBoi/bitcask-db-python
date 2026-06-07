@@ -9,6 +9,8 @@ class DbModel(BaseModel):
     base_dir: Annotated[Path, lambda x: Path(x) if isinstance(x, str) else x]
     max_key_size: int = 1
     max_value_size: int = 10
+    max_file_entries: int = 1000
+    max_file_count: int = 2
 
     @field_validator('base_dir', mode='after')
     def validate_base_dir(cls, base_dir: Path) -> Path:

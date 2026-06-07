@@ -8,5 +8,5 @@ wheels/
 
 # Virtual environments
 .venv
-data/db 1
+data/*
 .vscode/settings.json

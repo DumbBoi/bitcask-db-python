@@ -35,9 +35,9 @@ class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
         try:
             logger.info(f"received Put request: key={request.key}, value={request.value}")
             self.db.write(request.key, request.value)
-            return db_api_pb2.Response(status=True) 
+            return db_api_pb2.Response(status=True) # type: ignore
         except Exception as e:
-            logger.error(f"Error in Put method: {e}")
+            logger.error(f"error in Put method: {e}")
             populate_exception_context(context, e)
             return db_api_pb2.Response(status=False) # type: ignore
     
@@ -55,7 +55,7 @@ class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
             value = self.db.read(request.key)
             return db_api_pb2.Response(status=True, value=value) # type: ignore
         except Exception as e:
-            logger.error(f"Error in Read method: {e}")
+            logger.error(f"error in Read method: {e}")
             populate_exception_context(context, e)
             return db_api_pb2.Response(status=False) # type: ignore
 
@@ -70,7 +70,7 @@ class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
             logger.info(f"received ReadKeyRange request: start_key={request.start_key}, end_key={request.end_key}")
             raise NotImplementedError("ReadKeyRange method not implemented")
         except Exception as e:
-            logger.error(f"Error in ReadKeyRange method: {e}")
+            logger.error(f"error in ReadKeyRange method: {e}")
             populate_exception_context(context, e)
             return db_api_pb2.Response() # type: ignore
         
@@ -83,9 +83,17 @@ class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
             list of Response object containing request status."""
         try:
             logger.info(f"received BatchPut request with {len(request.kv_list)} key-value pairs")
-            raise NotImplementedError("BatchPut method not implemented")
+            for kv in request.kv_list:
+                try:
+                    logger.info(f"processing key-value pair: key={kv.key}, value={kv.value}")
+                    self.db.write(kv.key, kv.value)
+                except Exception as e:
+                    logger.error(f"error writing key-value pair: key={kv.key}, value={kv.value}, error={e}")
+                    populate_exception_context(context, e)
+                    return db_api_pb2.Response() # type: ignore
+            return db_api_pb2.Response(status=True) # type: ignore
         except Exception as e:
-            logger.error(f"Error in BatchPut method: {e}")
+            logger.error(f"error in BatchPut method: {e}")
             populate_exception_context(context, e)
             return db_api_pb2.Response() # type: ignore
         
@@ -98,9 +106,10 @@ class KeyValueDbServicerImpl(db_api_pb2_grpc.KeyValueDbServicer):
             Response object containing request status."""
         try:
             logger.info(f"received Delete request: key={request.key}")
-            raise NotImplementedError("Delete method not implemented")
+            self.db.delete(request.key)
+            return db_api_pb2.Response(status=True) # type: ignore
         except Exception as e:
-            logger.error(f"Error in Delete method: {e}")
+            logger.error(f"error in Delete method: {e}")
             populate_exception_context(context, e)
             return db_api_pb2.Response() # type: ignore
 
